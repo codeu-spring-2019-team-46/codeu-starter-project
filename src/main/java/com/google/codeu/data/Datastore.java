@@ -26,7 +26,6 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,7 +88,6 @@ public class Datastore {
     messageEntity.setProperty("text", message.getText());
     messageEntity.setProperty("timestamp", message.getTimestamp());
     messageEntity.setProperty("vote", message.getVote());
-    messageEntity.setProperty("tags", message.getTags());
 
     datastore.put(messageEntity);
   }
@@ -186,25 +184,12 @@ public class Datastore {
    * @return a list of messages posted by all users, or empty list if no users has posted a
    *     message. List is sorted by time descending.
    */
-  public List<Message> getMessagesByTags(List<Message> messages, String searchTag) {
-      List<Message> tagMessages = new ArrayList<Message>();
-      for (Message message : messages) {
-          if (message.isContainTag(searchTag)) {
-              tagMessages.add(message);
-          }
-      }
-      return tagMessages;
-  }
-
-  public List<Message> getAllMessages(String searchTag) {
+  public List<Message> getAllMessages() {
     Query query =
         new Query(KIND_MESSAGE)
             .addSort("timestamp", SortDirection.DESCENDING);
-    List<Message> allMessages = getMessagesFromQuery(query);
-    if (searchTag == null || searchTag.isEmpty()) {
-        return allMessages;
-    }
-    return getMessagesByTags(allMessages, searchTag);
+
+    return getMessagesFromQuery(query);
   }
 
   /**
@@ -226,12 +211,8 @@ public class Datastore {
         String text = (String) entity.getProperty("text");
         long timestamp = (long) entity.getProperty("timestamp");
         long vote = (long) entity.getProperty("vote");
-        ArrayList<String> tags = (ArrayList<String>)entity.getProperty("tags");
-        if (tags == null) {
-            tags = new ArrayList<>();
-        }
 
-        Message message = new Message(id, user, text, timestamp, vote, tags);
+        Message message = new Message(id, user, text, timestamp, vote);
         messages.add(message);
       } catch (Exception e) {
         System.err.println("Error reading message.");

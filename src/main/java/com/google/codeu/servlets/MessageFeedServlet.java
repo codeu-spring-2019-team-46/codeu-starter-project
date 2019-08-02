@@ -20,7 +20,6 @@ import java.util.List;
 @WebServlet("/feed")
 public class MessageFeedServlet extends HttpServlet {
     private Datastore datastore;
-    private static final String SEARCH_TAG = "tags";
 
     @Override
     public void init() throws ServletException {
@@ -47,11 +46,11 @@ public class MessageFeedServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         String loggedInUserEmail = getLoggedInUserEmail();
-        String searchTag = request.getParameter(SEARCH_TAG);
-        List<Message> messages = datastore.getAllMessages(searchTag);
+
+        List<Message> messages = datastore.getAllMessages();
         List<Message> messagesWithImage = new ArrayList<>();
         messages.forEach(message -> {
-            Message replacedMessage = new Message(message.getId(), message.getUser(), UserServlet.ImageReplacement(message.getText()), message.getTimestamp(), message.getVote(), message.getTags());
+            Message replacedMessage = new Message(message.getId(), message.getUser(), UserServlet.ImageReplacement(message.getText()), message.getTimestamp(), message.getVote());
             messagesWithImage.add(replacedMessage);
         });
 
